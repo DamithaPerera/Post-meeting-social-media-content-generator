@@ -26,7 +26,7 @@ export async function createOrUpdateGoogleAccount(userId: string, tokens: any, p
   const email = profile.email;
   const expiryDate = tokens.expiry_date ? BigInt(tokens.expiry_date) : null;
   return prisma.googleAccount.upsert({
-    where: { googleId },
+    where: { id: googleId },
     update: {
       userId, email,
       accessToken: tokens.access_token,
