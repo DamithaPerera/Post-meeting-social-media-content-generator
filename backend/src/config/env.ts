@@ -1,0 +1,23 @@
+export const env = {
+  PORT: Number(process.env.PORT || 8080),
+  CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
+  JWT_SECRET: process.env.JWT_SECRET || "dev_secret",
+  DATABASE_URL: process.env.DATABASE_URL!,
+  // Google
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID!,
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET!,
+  GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI!,
+  // Recall
+  RECALL_API_KEY: process.env.RECALL_API_KEY!,
+  RECALL_JOIN_LEAD_MINUTES_DEFAULT: Number(process.env.RECALL_JOIN_LEAD_MINUTES_DEFAULT || 5),
+  // LinkedIn
+  LINKEDIN_CLIENT_ID: process.env.LINKEDIN_CLIENT_ID!,
+  LINKEDIN_CLIENT_SECRET: process.env.LINKEDIN_CLIENT_SECRET!,
+  LINKEDIN_REDIRECT_URI: process.env.LINKEDIN_REDIRECT_URI!,
+  // Facebook
+  FACEBOOK_CLIENT_ID: process.env.FACEBOOK_CLIENT_ID!,
+  FACEBOOK_CLIENT_SECRET: process.env.FACEBOOK_CLIENT_SECRET!,
+  FACEBOOK_REDIRECT_URI: process.env.FACEBOOK_REDIRECT_URI!,
+  // AI
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+};
