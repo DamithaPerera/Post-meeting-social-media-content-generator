@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  email         String    @unique
+  name          String?
+  image         String?
+
+  // JWT sessions are stateless; we store OAuth accounts:
+  googleAccounts   GoogleAccount[]
+  socialAccounts   SocialAccount[]
+  settings         UserSettings?
+  meetings         Meeting[]
+  automations      Automation[]
+}
+
+model GoogleAccount {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // OAuth tokens
+  googleId     String
+  email        String
+  accessToken  String
+  refreshToken String
+  expiryDate   BigInt? // ms since epoch
+}
+
+enum SocialProvider {
+  LINKEDIN
+  FACEBOOK
+}
+
+model SocialAccount {
+  id           String         @id @default(cuid())
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider     SocialProvider
+  profileId    String
+  accessToken  String
+  refreshToken String?
+  expiryDate   BigInt?
+}
+
+model UserSettings {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  botLeadMinutes    Int      @default(5) // how many minutes before meeting to join
+}
+
+enum CallPlatform {
+  ZOOM
+  GOOGLE_MEET
+  MICROSOFT_TEAMS
+  UNKNOWN
+}
+
+model Meeting {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  eventId         String        // google event id (composed with account)
+  sourceAccountId String        // GoogleAccount.id
+  title           String
+  description     String?
+  startTime       DateTime
+  endTime         DateTime
+  attendees       MeetingAttendee[]
+  platform        CallPlatform  @default(UNKNOWN)
+  conferenceLink  String?
+  notetakerOn     Boolean       @default(false)
+
+  recallCallId    String?       // returned by recall.ai join
+  recallStatus    String?       // created|joining|recording|completed|failed
+  transcriptUrl   String?       // when ready
+  mediaUrl        String?       // audio/video if needed
+
+  drafts          SocialDraft[]
+  posts           SocialPost[]
+}
+
+model MeetingAttendee {
+  id        String   @id @default(cuid())
+  meetingId String
+  meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  name      String?
+  email     String?
+}
+
+enum SocialPlatform {
+  LINKEDIN
+  FACEBOOK
+}
+
+model Automation {
+  id            String         @id @default(cuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform      SocialPlatform
+  name          String
+  template      String         // handlebars-like template or prompt
+  enabled       Boolean        @default(true)
+}
+
+model SocialDraft {
+  id          String         @id @default(cuid())
+  meetingId   String
+  meeting     Meeting        @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  platform    SocialPlatform
+  content     String
+  createdAt   DateTime       @default(now())
+}
+
+model SocialPost {
+  id          String         @id @default(cuid())
+  meetingId   String
+  meeting     Meeting        @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  platform    SocialPlatform
+  content     String
+  externalId  String?        // post id from provider
+  postedAt    DateTime       @default(now())
+}
+
